@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NitorOSS.Azure.Logger\NitorOSS.Azure.Logger.csproj">
+      <Project>{E8FDECBB-6607-4CE4-97A7-C7BD1AA7E0A9}</Project>
+      <Name>NitorOSS.Azure.Logger</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
