@@ -16,7 +16,7 @@ namespace NitorOSS.Azure.ProvisionServiceBus
             try
             {
                 //accept required values for creating queue
-                Logger.LogMessage("\nCreating service bus queue......");
+                Logger.LogMessage("\nCreating service bus queue...");
                 Logger.LogMessage("\nPlease provide the name for queue: ");
                 string queueName = Console.ReadLine();
 
@@ -70,14 +70,14 @@ namespace NitorOSS.Azure.ProvisionServiceBus
                     QueueDescription queueDescription = new QueueDescription(queueName);
                     queueDescription.MaxSizeInMegabytes = Convert.ToInt32(maxQueueSize, CultureInfo.InvariantCulture);
                     queueDescription.DefaultMessageTimeToLive = new TimeSpan(0, 0, 0, Convert.ToInt32(messageTimeToLive, CultureInfo.InvariantCulture));
-                    queueDescription.RequiresDuplicateDetection = Convert.ToBoolean(duplicateDetection, CultureInfo.InvariantCulture);
+                    queueDescription.RequiresDuplicateDetection = duplicateDetection;
                     if (queueDescription.RequiresDuplicateDetection)
                     {
                         queueDescription.DuplicateDetectionHistoryTimeWindow = new TimeSpan(0, 0, 0, Convert.ToInt32(duplicateDetectionTimeWindowInSeconds, CultureInfo.InvariantCulture));
                     }
-                    queueDescription.EnableDeadLetteringOnMessageExpiration = Convert.ToBoolean(deadLettering, CultureInfo.InvariantCulture);
-                    queueDescription.RequiresSession = Convert.ToBoolean(session, CultureInfo.InvariantCulture);
-                    queueDescription.EnablePartitioning = Convert.ToBoolean(enablePartitioning, CultureInfo.InvariantCulture);
+                    queueDescription.EnableDeadLetteringOnMessageExpiration = deadLettering;
+                    queueDescription.RequiresSession = session;
+                    queueDescription.EnablePartitioning = enablePartitioning;
 
                     // Create topic
                     nameSpaceManager.CreateQueue(queueDescription);
