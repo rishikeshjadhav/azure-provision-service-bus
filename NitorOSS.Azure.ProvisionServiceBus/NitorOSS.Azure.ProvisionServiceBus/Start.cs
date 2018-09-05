@@ -7,7 +7,7 @@ namespace NitorOSS.Azure.ProvisionServiceBus
     using System;
     using System.Globalization;
 
-    class Start
+    public class Start
     {
         private static NamespaceManager nameSpaceManager;
 
@@ -93,155 +93,9 @@ namespace NitorOSS.Azure.ProvisionServiceBus
             }
         }
 
-        public static void CreateSubscription(string topicName)
-        {
-            string subscriptionName = string.Empty;
-            try
-            {
-                Logger.LogMessage("Creating Service Bus Topic Subscription...");
-                Logger.LogMessage("Please provide the name for Subscription: ");
-                subscriptionName = Console.ReadLine();
-                Logger.LogMessage(string.Format("Checking if Subscription with name {0} already exists under Topic with name {0}...", subscriptionName, topicName));
-                if (!nameSpaceManager.SubscriptionExists(topicName, subscriptionName))
-                {
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Creating Subscription with name {0} under Topic {1} in service bus namespace", subscriptionName, topicName));
-                    RuleDescription ruleDescription = null;
-                    //if (null != department)
-                    //{
-                    //    ruleDescription = new RuleDescription()
-                    //    {
-                    //        Name = string.Format(CultureInfo.InvariantCulture, "{0}_{1}_Rule", topicName, subscriptionName),
-                    //        Filter = new SqlFilter(string.Format(CultureInfo.InvariantCulture, "Department = '{0}'", department))
-                    //    };
-                    //}
-
-                    // Accept required details for creating topic
-                    Logger.LogMessage("Please provide the default message time to live (in seconds): ");
-                    string defaultMessageTime = Console.ReadLine();
-                    Logger.LogMessage("Please provide the lock duration (in seconds with max of 300 seconds): ");
-                    string lockDuration = Console.ReadLine();
-                    Logger.LogMessage("Please provide max delivery count: ");
-                    string maxDeliveryCount = Console.ReadLine();
-                    Logger.LogMessage("Do you want to move expired messages to the dead-letter subqueue? (y/n): ");
-                    string moveExpiredToDLQ = Console.ReadLine();
-                    bool requireMoveExpiredToDLQ = false;
-                    if (string.Equals(moveExpiredToDLQ, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        requireMoveExpiredToDLQ = true;
-                    }
-                    Logger.LogMessage("Do you want to move messages that cause filter evaluation exceptions  to the dead-letter subqueue? (y/n): ");
-                    string enableDeadLetteringOnFilterEvaluationExceptions = Console.ReadLine();
-                    bool requireEnableDeadLetteringOnFilterEvaluationExceptions = false;
-                    if (string.Equals(enableDeadLetteringOnFilterEvaluationExceptions, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        requireEnableDeadLetteringOnFilterEvaluationExceptions = true;
-                    }
-                    Logger.LogMessage("Do you want to enable sessions? (y/n): ");
-                    string requireSessions = Console.ReadLine();
-                    bool enableSessions = false;
-                    if (string.Equals(requireSessions, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        enableSessions = true;
-                    }
-
-                    // Create subscription description with provided details
-                    SubscriptionDescription subscriptionDescription = new SubscriptionDescription(topicName, subscriptionName);
-                    subscriptionDescription.DefaultMessageTimeToLive = new TimeSpan(0, 0, 0, Convert.ToInt32(defaultMessageTime, CultureInfo.InvariantCulture));
-                    subscriptionDescription.LockDuration = new TimeSpan(0, 0, Convert.ToInt32(lockDuration, CultureInfo.InvariantCulture));
-                    subscriptionDescription.MaxDeliveryCount = Convert.ToInt32(maxDeliveryCount, CultureInfo.InvariantCulture);
-                    subscriptionDescription.EnableDeadLetteringOnMessageExpiration = requireMoveExpiredToDLQ;
-                    subscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions = requireEnableDeadLetteringOnFilterEvaluationExceptions;
-                    subscriptionDescription.RequiresSession = enableSessions;
-
-                    // Create subscription
-                    if (null == ruleDescription)
-                    {
-                        nameSpaceManager.CreateSubscription(subscriptionDescription);
-                    }
-                    else
-                    {
-                        nameSpaceManager.CreateSubscription(subscriptionDescription, ruleDescription);
-                    }
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Subscription with name {0} created under Topic with name {1} in service bus namespace", subscriptionName, topicName));
-                }
-                else
-                {
-                    Logger.LogError(string.Format(CultureInfo.InvariantCulture, "Subscription with name {0} already exists under Topic with name {1} under in service bus namespace", subscriptionName, topicName));
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        public static string CreateTopic()
-        {
-            string topicName = string.Empty;
-            try
-            {
-                Logger.LogMessage("Creating service bus topic...");
-                Logger.LogMessage("Please provide the name for topic: ");
-                topicName = Console.ReadLine();
-                Logger.LogMessage(string.Format("Checking if topic with name {0} already exists in service bus namespace...", topicName));
-                if (!nameSpaceManager.TopicExists(topicName))
-                {
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Creating Topic with name {0} in service bus namespace", topicName));
-
-                    // Accept required details for creating topic
-                    Logger.LogMessage("Please provide max topic size in MB (1024, 2048, 3072, 4096, 5120): ");
-                    string maxTopicSize = Console.ReadLine();
-                    Logger.LogMessage("Please provide message time to live (in seconds): ");
-                    string messageTimeToLive = Console.ReadLine();
-                    Logger.LogMessage("Do you want to enable duplicate detection? (y/n): ");
-                    string enableDuplicateDetection = Console.ReadLine();
-                    bool duplicateDetection = false;
-                    string duplicateDetectionTimeWindowInSeconds = "30";
-                    if (string.Equals(enableDuplicateDetection, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        duplicateDetection = true;
-                        Logger.LogMessage("Please provide duplicate detection time (in seconds): ");
-                        duplicateDetectionTimeWindowInSeconds = Console.ReadLine();
-                    }
-                    Logger.LogMessage("Do you want to enable partitioning? (y/n): ");
-                    string enableTopicPartitioning = Console.ReadLine();
-                    bool enablePartitioning = false;
-                    if (string.Equals(enableTopicPartitioning, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        enablePartitioning = true;
-                    }
-
-                    // Create topic description with provided details
-                    TopicDescription topicDescription = new TopicDescription(topicName);
-                    topicDescription.MaxSizeInMegabytes = Convert.ToInt32(maxTopicSize, CultureInfo.InvariantCulture);
-                    topicDescription.DefaultMessageTimeToLive = new TimeSpan(0, 0, 0, Convert.ToInt32(messageTimeToLive, CultureInfo.InvariantCulture));
-                    topicDescription.RequiresDuplicateDetection = duplicateDetection;
-                    if (topicDescription.RequiresDuplicateDetection)
-                    {
-                        topicDescription.DuplicateDetectionHistoryTimeWindow = new TimeSpan(0, 0, 0, Convert.ToInt32(duplicateDetectionTimeWindowInSeconds, CultureInfo.InvariantCulture));
-                    }
-                    topicDescription.EnablePartitioning = enablePartitioning;
-
-                    // Create topic
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Creating topic with name {0} in service bus namespace...", topicName));
-                    nameSpaceManager.CreateTopic(topicDescription);
-
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Topic with name {0} created in service bus namespace", topicName));
-                }
-                else
-                {
-                    Logger.LogError(string.Format(CultureInfo.InvariantCulture, "\nTopic with name {0} already exists in service bus namespace\n", topicName));
-                }
-            }
-            catch
-            {
-                throw;
-            }
-            return topicName;
-        }
-
         static void Main(string[] args)
         {
+            Logger.LogMessage("\n Started execution of utility.");
             try
             {
                 Logger.LogMessage("Please provide your service bus namespace url: ");
@@ -262,20 +116,27 @@ namespace NitorOSS.Azure.ProvisionServiceBus
                         }
                     case 2:
                         {
-                            string topicName = CreateTopic();
-                            Logger.LogMessage("Do you want to create subscriptions for this topic? (y/n):");
-                            string requireTopicSubscriptions = Console.ReadLine();
-                            if (string.Equals(requireTopicSubscriptions, "y", StringComparison.OrdinalIgnoreCase))
+                            Topic topic = new Topic(serviceBusConnectionString);
+                            if (topic.Create())
                             {
-                                CreateSubscription(topicName);
+                                if (Helper.GetBooleanResponse("Do you want to create subscriptions for this topic? (y/n): "))
+                                {
+                                    Subscription subscription = new Subscription(serviceBusConnectionString);
+                                    subscription.Create(topic.Name);
+                                }
                             }
                             break;
                         }
                     case 3:
                         {
+                            Topic topic = new Topic(serviceBusConnectionString);
                             Logger.LogMessage("Please provide the name for topic under which subscription is to be created: ");
-                            string topicName = Console.ReadLine();
-                            CreateSubscription(topicName);
+                            topic.Name = Console.ReadLine();
+                            if (!topic.CheckIfExists(topic.Name))
+                            {
+                                Subscription subscription = new Subscription(serviceBusConnectionString);
+                                subscription.Create(topic.Name);
+                            }
                             break;
                         }
                 }
@@ -284,9 +145,8 @@ namespace NitorOSS.Azure.ProvisionServiceBus
             {
                 Logger.LogException(exception);
             }
-
+            Logger.LogMessage("\n Completed execution of utility, press any key to exit.");
             Console.ReadKey();
-            Logger.LogMessage(string.Empty);
         }
     }
 }
