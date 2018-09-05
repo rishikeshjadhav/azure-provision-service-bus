@@ -175,71 +175,6 @@ namespace NitorOSS.Azure.ProvisionServiceBus
             }
         }
 
-        public static string CreateTopic()
-        {
-            string topicName = string.Empty;
-            try
-            {
-                Logger.LogMessage("Creating service bus topic...");
-                Logger.LogMessage("Please provide the name for topic: ");
-                topicName = Console.ReadLine();
-                Logger.LogMessage(string.Format("Checking if topic with name {0} already exists in service bus namespace...", topicName));
-                if (!nameSpaceManager.TopicExists(topicName))
-                {
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Creating Topic with name {0} in service bus namespace", topicName));
-
-                    // Accept required details for creating topic
-                    Logger.LogMessage("Please provide max topic size in MB (1024, 2048, 3072, 4096, 5120): ");
-                    string maxTopicSize = Console.ReadLine();
-                    Logger.LogMessage("Please provide message time to live (in seconds): ");
-                    string messageTimeToLive = Console.ReadLine();
-                    Logger.LogMessage("Do you want to enable duplicate detection? (y/n): ");
-                    string enableDuplicateDetection = Console.ReadLine();
-                    bool duplicateDetection = false;
-                    string duplicateDetectionTimeWindowInSeconds = "30";
-                    if (string.Equals(enableDuplicateDetection, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        duplicateDetection = true;
-                        Logger.LogMessage("Please provide duplicate detection time (in seconds): ");
-                        duplicateDetectionTimeWindowInSeconds = Console.ReadLine();
-                    }
-                    Logger.LogMessage("Do you want to enable partitioning? (y/n): ");
-                    string enableTopicPartitioning = Console.ReadLine();
-                    bool enablePartitioning = false;
-                    if (string.Equals(enableTopicPartitioning, "y", StringComparison.OrdinalIgnoreCase))
-                    {
-                        enablePartitioning = true;
-                    }
-
-                    // Create topic description with provided details
-                    TopicDescription topicDescription = new TopicDescription(topicName);
-                    topicDescription.MaxSizeInMegabytes = Convert.ToInt32(maxTopicSize, CultureInfo.InvariantCulture);
-                    topicDescription.DefaultMessageTimeToLive = new TimeSpan(0, 0, 0, Convert.ToInt32(messageTimeToLive, CultureInfo.InvariantCulture));
-                    topicDescription.RequiresDuplicateDetection = duplicateDetection;
-                    if (topicDescription.RequiresDuplicateDetection)
-                    {
-                        topicDescription.DuplicateDetectionHistoryTimeWindow = new TimeSpan(0, 0, 0, Convert.ToInt32(duplicateDetectionTimeWindowInSeconds, CultureInfo.InvariantCulture));
-                    }
-                    topicDescription.EnablePartitioning = enablePartitioning;
-
-                    // Create topic
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Creating topic with name {0} in service bus namespace...", topicName));
-                    nameSpaceManager.CreateTopic(topicDescription);
-
-                    Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Topic with name {0} created in service bus namespace", topicName));
-                }
-                else
-                {
-                    Logger.LogError(string.Format(CultureInfo.InvariantCulture, "\nTopic with name {0} already exists in service bus namespace\n", topicName));
-                }
-            }
-            catch
-            {
-                throw;
-            }
-            return topicName;
-        }
-
         static void Main(string[] args)
         {
             try
@@ -262,12 +197,15 @@ namespace NitorOSS.Azure.ProvisionServiceBus
                         }
                     case 2:
                         {
-                            string topicName = CreateTopic();
-                            Logger.LogMessage("Do you want to create subscriptions for this topic? (y/n):");
-                            string requireTopicSubscriptions = Console.ReadLine();
-                            if (string.Equals(requireTopicSubscriptions, "y", StringComparison.OrdinalIgnoreCase))
+                            Topic topic = new Topic(serviceBusConnectionString);
+                            if (topic.Create())
                             {
-                                CreateSubscription(topicName);
+                                Logger.LogMessage("Do you want to create subscriptions for this topic? (y/n):");
+                                string requireTopicSubscriptions = Console.ReadLine();
+                                if (string.Equals(requireTopicSubscriptions, "y", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    CreateSubscription(topic.Name);
+                                }
                             }
                             break;
                         }
@@ -275,7 +213,11 @@ namespace NitorOSS.Azure.ProvisionServiceBus
                         {
                             Logger.LogMessage("Please provide the name for topic under which subscription is to be created: ");
                             string topicName = Console.ReadLine();
-                            CreateSubscription(topicName);
+                            Topic topic = new Topic(serviceBusConnectionString);
+                            if (!topic.CheckIfExists(topicName))
+                            {
+                                CreateSubscription(topicName);
+                            }
                             break;
                         }
                 }
