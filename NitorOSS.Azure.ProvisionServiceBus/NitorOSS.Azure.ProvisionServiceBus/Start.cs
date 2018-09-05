@@ -13,23 +13,84 @@ namespace NitorOSS.Azure.ProvisionServiceBus
 
         public static void CreateQueue()
         {
-            Logger.LogMessage("\nCreating service bus queue......");
-            Logger.LogMessage("\nPlease provide the name for queue: ");
-            string serviceBusQueueName = Console.ReadLine();
+            try
+            {
+                //accept required values for creating queue
+                Logger.LogMessage("\nCreating service bus queue...");
+                Logger.LogMessage("\nPlease provide the name for queue: ");
+                string queueName = Console.ReadLine();
 
-            Logger.LogMessage("\n\nEnter max queue size:- \n Available Options \n 1. 1GB \n 2. 2GB \n 3. 3GB \n 4. 4GGB \n 5. 5GB ");
-            int maxQueueSize = int.Parse(Console.ReadLine());
+                Logger.LogMessage(string.Format("\nChecking if queue with name {0} already exists in service bus namespace...", queueName));
+                if (!nameSpaceManager.QueueExists(queueName))
+                {
+                    Logger.LogMessage("\nPlease provide max queue size in MB (1024, 2048, 3072, 4096, 5120): ");
+                    string maxQueueSize = Console.ReadLine();
+                    Logger.LogMessage("\nPlease provide message time to live (in seconds): ");
+                    string messageTimeToLive = Console.ReadLine();
 
-            Logger.LogMessage("\n\nPlease select info for message time to live: ");
-            Logger.LogMessage("\nNumber of days: ");
-            int msgTimeToLiveDays = int.Parse(Console.ReadLine());
-            Logger.LogMessage("\nNumber of hours: ");
-            int msgTimeToLiveHours = int.Parse(Console.ReadLine());
-            Logger.LogMessage("\nNumber of minutes: ");
-            int msgTimeToLiveMinutes = int.Parse(Console.ReadLine());
-            Logger.LogMessage("\nNumber of seconds: ");
-            int msgTimeToLiveSeconds = int.Parse(Console.ReadLine());
+                    Logger.LogMessage("\nPlease provide lock duration time (in seconds): ");
+                    string lockDuration = Console.ReadLine();
 
+                    Logger.LogMessage("\nDo you want to enable duplicate detection? (y/n): ");
+                    string enableDuplicateDetection = Console.ReadLine();
+                    bool duplicateDetection = false;
+                    string duplicateDetectionTimeWindowInSeconds = "30";
+                    if (string.Equals(enableDuplicateDetection, "y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        duplicateDetection = true;
+                        Logger.LogMessage("\nPlease provide duplicate detection time (in seconds): ");
+                        duplicateDetectionTimeWindowInSeconds = Console.ReadLine();
+                    }
+
+                    Logger.LogMessage("\nDo you want to enable dead lettering on message expiration? (y/n)");
+                    string enableDeadLettering = Console.ReadLine();
+                    bool deadLettering = false;
+                    if (string.Equals(enableDeadLettering, "y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        deadLettering = true;
+                    }
+
+                    Logger.LogMessage("\nDo you want to enable sessions? (y/n)");
+                    string enableSession = Console.ReadLine();
+                    bool session = false;
+                    if (string.Equals(enableSession, "y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        session = true;
+                    }
+
+                    Logger.LogMessage("\nDo you want to enable partitioning? (y/n): ");
+                    string enableQueuePartitioning = Console.ReadLine();
+                    bool enablePartitioning = false;
+                    if (string.Equals(enableQueuePartitioning, "y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        enablePartitioning = true;
+                    }
+
+                    // Create queue description with entered values                   
+                    QueueDescription queueDescription = new QueueDescription(queueName);
+                    queueDescription.MaxSizeInMegabytes = Convert.ToInt32(maxQueueSize, CultureInfo.InvariantCulture);
+                    queueDescription.DefaultMessageTimeToLive = new TimeSpan(0, 0, 0, Convert.ToInt32(messageTimeToLive, CultureInfo.InvariantCulture));
+                    queueDescription.RequiresDuplicateDetection = duplicateDetection;
+                    if (queueDescription.RequiresDuplicateDetection)
+                    {
+                        queueDescription.DuplicateDetectionHistoryTimeWindow = new TimeSpan(0, 0, 0, Convert.ToInt32(duplicateDetectionTimeWindowInSeconds, CultureInfo.InvariantCulture));
+                    }
+                    queueDescription.EnableDeadLetteringOnMessageExpiration = deadLettering;
+                    queueDescription.RequiresSession = session;
+                    queueDescription.EnablePartitioning = enablePartitioning;
+
+                    // Create topic
+                    nameSpaceManager.CreateQueue(queueDescription);
+                }
+                else
+                {
+                    Logger.LogError(string.Format(CultureInfo.InvariantCulture, "\nQueue with name {0} already exists in service bus namespace\n", queueName));
+                }
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public static void CreateTopic()
