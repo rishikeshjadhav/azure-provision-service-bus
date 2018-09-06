@@ -58,6 +58,26 @@ namespace NitorOSS.Azure.ProvisionServiceBus
             return subscriptionDescription;
         }
 
+        private RuleDescription GenerateRuleDescription(string topicName, string subscriptionName)
+        {
+            RuleDescription ruleDescription = null;
+            bool areFilterRequired = Helper.GetBooleanResponse("\n Do you want to create this subscription with any filters? (y/n): ");
+            if (areFilterRequired)
+            {
+                Logger.LogMessage("\n Please provide the SQL Filter expression for the subscription filter: ");
+                string ruleDescriptionSQLFilterExpression = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(ruleDescriptionSQLFilterExpression))
+                {
+                    ruleDescription = new RuleDescription()
+                    {
+                        Name = string.Format(CultureInfo.InvariantCulture, "{0}_{1}_Rule", topicName, subscriptionName),
+                        Filter = new SqlFilter(ruleDescriptionSQLFilterExpression)
+                    };
+                }
+            }
+            return ruleDescription;
+        }
+
         public bool Create(string topicName)
         {
             bool result = true;
@@ -70,18 +90,10 @@ namespace NitorOSS.Azure.ProvisionServiceBus
                 if (!CheckIfExists(topicName, Name))
                 {
                     Logger.LogMessage(string.Format(CultureInfo.InvariantCulture, "Creating Subscription with name {0} under Topic {1} in service bus namespace", Name, topicName));
-                    RuleDescription ruleDescription = null;
-                    //if (null != department)
-                    //{
-                    //    ruleDescription = new RuleDescription()
-                    //    {
-                    //        Name = string.Format(CultureInfo.InvariantCulture, "{0}_{1}_Rule", topicName, subscriptionName),
-                    //        Filter = new SqlFilter(string.Format(CultureInfo.InvariantCulture, "Department = '{0}'", department))
-                    //    };
-                    //}
-
                     // Generate subscription description
                     SubscriptionDescription subscriptionDescription = GenerateSubscriptionDescription(topicName, Name);
+                    // Generate rule description
+                    RuleDescription ruleDescription = GenerateRuleDescription(topicName, Name);
                     // Create subscription
                     if (null == ruleDescription)
                     {
@@ -103,7 +115,6 @@ namespace NitorOSS.Azure.ProvisionServiceBus
                 result = false;
                 throw;
             }
-
             return result;
         }
     }
