@@ -1,30 +1,21 @@
 ﻿
 namespace NitorOSS.Azure.ProvisionServiceBus
 {
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
     using NitorOSS.Azure.Logger;
     using System;
-    using System.Globalization;
 
     public class Start
     {
-        private static NamespaceManager nameSpaceManager;
-
         static void Main(string[] args)
         {
-            Logger.LogMessage("\n Started execution of utility.");
+            Logger.LogMessage("\nStarted execution of utility.");
             try
             {
                 Logger.LogMessage("Please provide your service bus namespace url: ");
                 string serviceBusConnectionString = Console.ReadLine();
                 Logger.LogMessage("Provided service bus url :- " + serviceBusConnectionString + "\n\n");
-                // Establish connection with service bus
-                nameSpaceManager = NamespaceManager.CreateFromConnectionString(serviceBusConnectionString);
-
                 Logger.LogMessage("Please select the component to be created \n 1. Queue \n 2. Topic \n 3. Subscription");
                 int selectedComponent = int.Parse(Console.ReadLine());
-
                 switch (selectedComponent)
                 {
                     case 1:
@@ -64,7 +55,7 @@ namespace NitorOSS.Azure.ProvisionServiceBus
             {
                 Logger.LogException(exception);
             }
-            Logger.LogMessage("\n Completed execution of utility, press any key to exit.");
+            Logger.LogMessage("\nCompleted execution of utility, press any key to exit.");
             Console.ReadKey();
         }
     }
