@@ -42,7 +42,7 @@ For details on how to provision Service Bus Topic subscription using portal, ple
 ## Usage
 
 #### For provisioning Queue, Topic and Subscriptions
-Run the utility using Visual Studio and answer the questions for provisioning the componennt
+Run the utility using Visual Studio and answer the questions for provisioning the component
 
 #### For provisioning Subscription with filtering capability
 Provide the SQL Filter expression for the subscription filter, few examples of SQL Filter expressions are,
