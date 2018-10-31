@@ -28,15 +28,21 @@ Step 5: You will be asked a series of questions for provisioning Service Bus Que
 
 #### 1. Create Service Bus Queue
 
+For details on how to provision Service Bus Queue using this utility, please refer this [link](https://medium.com/@rishijadhav2792/provision-azure-service-bus-utility-61b78b688cfe)
+
 For details on how to provision Service Bus Queue using portal, please refer this [link](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-get-started-with-queues)
 
 
 
 #### 2. Create Service Bus Topic
 
+For details on how to provision Service Bus Topic using this utility, please refer this [link](https://medium.com/@rishijadhav2792/provision-azure-service-bus-utility-61b78b688cfe)
+
 For details on how to provision Service Bus Topic using portal, please refer this [link](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-how-to-use-topics-subscriptions)
 
 #### 3. Create Service Bus Topic Subscription (**_with filtering capability_**)
+
+For details on how to provision Service Bus Topic subscription using this utility, please refer this [link](https://medium.com/@rishijadhav2792/provision-azure-service-bus-utility-61b78b688cfe)
 
 For details on how to provision Service Bus Topic subscription using portal, please refer this [link](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-how-to-use-topics-subscriptions#3-create-a-subscription-to-the-topic)
 
