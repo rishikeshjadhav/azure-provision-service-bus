@@ -22,6 +22,8 @@ Step 3: Build the solution (This will download all the required dependencies fro
 
 Step 4: Run the utility using Visual Studio (2015 or higher)
 
+Step 5: You will be asked a series of questions for provisioning Service Bus Queue, Topic or Subscriptions
+
 ## Functions of utility
 
 #### 1. Create Service Bus Queue
